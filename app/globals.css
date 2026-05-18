@@ -1,0 +1,286 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Base colors - Light mode */
+  --background: #f8f9fa;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #1a2f6e;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f1f5f9;
+  --muted-foreground: #6b7280;
+  --accent: #f1f5f9;
+  --accent-foreground: #0a0a0a;
+  --destructive: #c0392b;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #1a2f6e;
+  
+  /* EMS specific colors */
+  --police: #1a2f6e;
+  --police-foreground: #ffffff;
+  --medical: #1a7a4a;
+  --medical-foreground: #ffffff;
+  --fire: #c0392b;
+  --fire-foreground: #ffffff;
+  --helpline: #00aaaa;
+  --helpline-foreground: #ffffff;
+  --on-duty: #22c55e;
+  --on-duty-foreground: #ffffff;
+  --critical: #ef4444;
+  --critical-foreground: #ffffff;
+  --serious: #eab308;
+  --serious-foreground: #0a0a0a;
+  --minor: #22c55e;
+  --minor-foreground: #ffffff;
+  
+  /* Chart colors */
+  --chart-1: #1a2f6e;
+  --chart-2: #1a7a4a;
+  --chart-3: #c0392b;
+  --chart-4: #00aaaa;
+  --chart-5: #eab308;
+  
+  --radius: 0.75rem;
+  
+  /* Sidebar */
+  --sidebar: #f8f9fa;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #1a2f6e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #1a2f6e;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #f8f9fa;
+  --card: #1a1a1a;
+  --card-foreground: #f8f9fa;
+  --popover: #1a1a1a;
+  --popover-foreground: #f8f9fa;
+  --primary: #2a4494;
+  --primary-foreground: #ffffff;
+  --secondary: #262626;
+  --secondary-foreground: #f8f9fa;
+  --muted: #262626;
+  --muted-foreground: #9ca3af;
+  --accent: #262626;
+  --accent-foreground: #f8f9fa;
+  --destructive: #e74c3c;
+  --destructive-foreground: #ffffff;
+  --border: #262626;
+  --input: #262626;
+  --ring: #2a4494;
+  
+  /* EMS specific colors - Dark mode */
+  --police: #2a4494;
+  --police-foreground: #ffffff;
+  --medical: #22a060;
+  --medical-foreground: #ffffff;
+  --fire: #e74c3c;
+  --fire-foreground: #ffffff;
+  --helpline: #00cccc;
+  --helpline-foreground: #0a0a0a;
+  --on-duty: #16a34a;
+  --on-duty-foreground: #ffffff;
+  --critical: #dc2626;
+  --critical-foreground: #ffffff;
+  --serious: #ca8a04;
+  --serious-foreground: #0a0a0a;
+  --minor: #16a34a;
+  --minor-foreground: #ffffff;
+  
+  /* Chart colors - Dark mode */
+  --chart-1: #2a4494;
+  --chart-2: #22a060;
+  --chart-3: #e74c3c;
+  --chart-4: #00cccc;
+  --chart-5: #ca8a04;
+  
+  /* Sidebar - Dark mode */
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #f8f9fa;
+  --sidebar-primary: #2a4494;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #262626;
+  --sidebar-accent-foreground: #f8f9fa;
+  --sidebar-border: #262626;
+  --sidebar-ring: #2a4494;
+}
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-police: var(--police);
+  --color-police-foreground: var(--police-foreground);
+  --color-medical: var(--medical);
+  --color-medical-foreground: var(--medical-foreground);
+  --color-fire: var(--fire);
+  --color-fire-foreground: var(--fire-foreground);
+  --color-helpline: var(--helpline);
+  --color-helpline-foreground: var(--helpline-foreground);
+  --color-on-duty: var(--on-duty);
+  --color-on-duty-foreground: var(--on-duty-foreground);
+  --color-critical: var(--critical);
+  --color-critical-foreground: var(--critical-foreground);
+  --color-serious: var(--serious);
+  --color-serious-foreground: var(--serious-foreground);
+  --color-minor: var(--minor);
+  --color-minor-foreground: var(--minor-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 16px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Mapbox styles */
+.mapboxgl-map {
+  font-family: inherit;
+}
+
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+/* Pulse animation for panic button */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+/* Breathing animation */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Audio waveform animation */
+@keyframes waveform {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 24px;
+  }
+}
+
+.animate-waveform {
+  animation: waveform 0.5s ease-in-out infinite;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    var(--muted-foreground) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
