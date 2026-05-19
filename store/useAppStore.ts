@@ -123,6 +123,11 @@ interface AppState {
   currentIncident: Incident | null
   setCurrentIncident: (incident: Incident | null) => void
   
+  // Active Dispatch (patient's current emergency - session only, not persisted)
+  activeDispatch: Incident | null
+  setActiveDispatch: (incident: Incident | null) => void
+  resolveDispatch: () => void
+  
   // Notifications
   notifications: Notification[]
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void
@@ -138,7 +143,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Onboarding
       hasOnboarded: false,
       setHasOnboarded: (value) => set({ hasOnboarded: value }),
@@ -152,7 +157,17 @@ export const useAppStore = create<AppState>()(
       setUser: (user) => set({ user }),
       isLoggedIn: false,
       login: (user) => set({ user, isLoggedIn: true }),
-      logout: () => set({ user: null, isLoggedIn: false, isOnDuty: false, currentVehicle: null }),
+      logout: () => set({ 
+        user: null, 
+        isLoggedIn: false, 
+        role: null,
+        isOnDuty: false, 
+        currentVehicle: null,
+        currentIncident: null,
+        activeDispatch: null,
+        inspectionComplete: false,
+        shiftStartTime: null,
+      }),
       
       // Duty Status
       isOnDuty: false,
@@ -182,6 +197,11 @@ export const useAppStore = create<AppState>()(
       currentIncident: null,
       setCurrentIncident: (incident) => set({ currentIncident: incident }),
       
+      // Active Dispatch (patient's current emergency)
+      activeDispatch: null,
+      setActiveDispatch: (incident) => set({ activeDispatch: incident }),
+      resolveDispatch: () => set({ activeDispatch: null }),
+      
       // Notifications
       notifications: [],
       addNotification: (notification) => set((state) => ({
@@ -204,9 +224,7 @@ export const useAppStore = create<AppState>()(
         notifications: state.notifications.map((n) => ({ ...n, read: true })),
       })),
       clearNotifications: () => set({ notifications: [] }),
-      get unreadCount() {
-        return get().notifications.filter((n) => !n.read).length
-      },
+      unreadCount: 0, // Placeholder - use selector instead
       
       // Dispatcher
       dispatcherStatus: 'clocked-out',
@@ -222,4 +240,9 @@ export const useAppStore = create<AppState>()(
       }),
     }
   )
+)
+
+// Derived selector for unread notification count
+export const useUnreadCount = () => useAppStore((state) => 
+  state.notifications.filter((n) => !n.read).length
 )

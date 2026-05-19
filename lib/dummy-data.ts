@@ -85,6 +85,29 @@ export const DEPARTMENTS = [
 // Tembisa / Ekurhuleni area coordinates
 export const MAP_CENTER = { lat: -26.0067, lng: 28.2260 }
 
+// Dummy Patient for authentication
+export const DUMMY_PATIENT: User = {
+  id: 'patient-1',
+  name: 'Thandi',
+  surname: 'Molefe',
+  dateOfBirth: '1992-05-15',
+  gender: 'female',
+  language: 'Zulu',
+  bloodType: 'O+',
+  weight: 65,
+  height: 165,
+  medicalConditions: ['Asthmatic'],
+  medications: 'Ventolin inhaler as needed',
+  medicalAid: 'Discovery Health',
+  medicalAidNumber: 'DH12345678',
+  insurer: 'Discovery Insure',
+  preferredGP: 'Dr. Nkosi',
+  emergencyContacts: [
+    { name: 'Sipho Molefe', relationship: 'Husband', phone: '0823456789' },
+    { name: 'Grace Molefe', relationship: 'Mother', phone: '0834567890' },
+  ],
+}
+
 // Dummy Vehicles
 export const DUMMY_VEHICLES: Vehicle[] = [
   { id: 'v1', plate: 'GP 123 EMS', make: 'Toyota Quantum', type: 'ambulance', status: 'available', inspectionComplete: true, lastInspection: '2024-01-15' },
@@ -101,13 +124,118 @@ export const DUMMY_VEHICLES: Vehicle[] = [
   { id: 'v12', plate: 'EKU FIRE 03', make: 'Iveco Eurocargo', type: 'fire', status: 'available', inspectionComplete: true, lastInspection: '2024-01-15' },
 ]
 
-// Dummy Responders
-export const DUMMY_RESPONDERS: Partial<User>[] = [
-  { id: 'r1', name: 'Thabo', surname: 'Mokoena', employeeId: 'EMS001', department: 'EMS/Ambulance', rank: 'Paramedic', certifications: ['ALS', 'BLS'] },
-  { id: 'r2', name: 'Sipho', surname: 'Ndlovu', employeeId: 'EMS002', department: 'EMS/Ambulance', rank: 'EMT', certifications: ['EMT', 'BLS'] },
-  { id: 'r3', name: 'Nomsa', surname: 'Khumalo', employeeId: 'POL001', department: 'Police/Metro', rank: 'Constable', certifications: ['First Responder'] },
-  { id: 'r4', name: 'Pieter', surname: 'Botha', employeeId: 'POL002', department: 'Police/Metro', rank: 'Sergeant', certifications: ['First Responder', 'BLS'] },
-  { id: 'r5', name: 'Lindiwe', surname: 'Dlamini', employeeId: 'FIRE001', department: 'Fire & Rescue', rank: 'Captain', certifications: ['BLS', 'First Responder'] },
+// Dummy Responders (full User shape for authentication)
+export const DUMMY_RESPONDERS: User[] = [
+  { 
+    id: 'r1', 
+    name: 'Thabo', 
+    surname: 'Mokoena', 
+    dateOfBirth: '1988-03-12',
+    gender: 'male',
+    language: 'Sotho',
+    bloodType: 'A+',
+    weight: 80,
+    height: 178,
+    medicalConditions: [],
+    medications: '',
+    medicalAid: 'GEMS',
+    medicalAidNumber: 'GEMS987654',
+    insurer: 'Old Mutual',
+    preferredGP: 'Dr. Van der Berg',
+    emergencyContacts: [{ name: 'Nomsa Mokoena', relationship: 'Wife', phone: '0821234567' }],
+    employeeId: 'EMS001', 
+    department: 'EMS/Ambulance', 
+    rank: 'Paramedic', 
+    certifications: ['ALS', 'BLS'] 
+  },
+  { 
+    id: 'r2', 
+    name: 'Sipho', 
+    surname: 'Ndlovu', 
+    dateOfBirth: '1995-07-22',
+    gender: 'male',
+    language: 'Zulu',
+    bloodType: 'B+',
+    weight: 75,
+    height: 175,
+    medicalConditions: [],
+    medications: '',
+    medicalAid: 'Bonitas',
+    medicalAidNumber: 'BON123456',
+    insurer: 'Sanlam',
+    preferredGP: 'Dr. Khumalo',
+    emergencyContacts: [{ name: 'Lindiwe Ndlovu', relationship: 'Sister', phone: '0832345678' }],
+    employeeId: 'EMS002', 
+    department: 'EMS/Ambulance', 
+    rank: 'EMT', 
+    certifications: ['EMT', 'BLS'] 
+  },
+  { 
+    id: 'r3', 
+    name: 'Nomsa', 
+    surname: 'Khumalo', 
+    dateOfBirth: '1990-11-05',
+    gender: 'female',
+    language: 'Zulu',
+    bloodType: 'O-',
+    weight: 62,
+    height: 163,
+    medicalConditions: [],
+    medications: '',
+    medicalAid: 'Polmed',
+    medicalAidNumber: 'POL789012',
+    insurer: 'Santam',
+    preferredGP: 'Dr. Botha',
+    emergencyContacts: [{ name: 'James Khumalo', relationship: 'Father', phone: '0843456789' }],
+    employeeId: 'POL001', 
+    department: 'Police/Metro', 
+    rank: 'Constable', 
+    certifications: ['First Responder'] 
+  },
+  { 
+    id: 'r4', 
+    name: 'Pieter', 
+    surname: 'Botha', 
+    dateOfBirth: '1985-01-30',
+    gender: 'male',
+    language: 'Afrikaans',
+    bloodType: 'AB+',
+    weight: 85,
+    height: 182,
+    medicalConditions: [],
+    medications: '',
+    medicalAid: 'Polmed',
+    medicalAidNumber: 'POL345678',
+    insurer: 'Outsurance',
+    preferredGP: 'Dr. Smith',
+    emergencyContacts: [{ name: 'Anna Botha', relationship: 'Wife', phone: '0854567890' }],
+    employeeId: 'POL002', 
+    department: 'Police/Metro', 
+    rank: 'Sergeant', 
+    certifications: ['First Responder', 'BLS'] 
+  },
+  { 
+    id: 'r5', 
+    name: 'Lindiwe', 
+    surname: 'Dlamini', 
+    dateOfBirth: '1982-09-18',
+    gender: 'female',
+    language: 'Swati',
+    bloodType: 'A-',
+    weight: 68,
+    height: 170,
+    medicalConditions: [],
+    medications: '',
+    medicalAid: 'Medihelp',
+    medicalAidNumber: 'MH567890',
+    insurer: 'Hollard',
+    preferredGP: 'Dr. Moloi',
+    emergencyContacts: [{ name: 'David Dlamini', relationship: 'Husband', phone: '0865678901' }],
+    employeeId: 'FIRE001', 
+    department: 'Fire & Rescue', 
+    rank: 'Captain', 
+    certifications: ['BLS', 'First Responder'] 
+  },
 ]
 
 // Dummy Dispatchers
