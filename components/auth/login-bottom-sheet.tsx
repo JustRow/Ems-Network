@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { X, ChevronRight, Plus, Trash2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
 import { useAppStore, type User, type EmergencyContact } from '@/store/useAppStore'
 import {
   BLOOD_TYPES,
@@ -18,6 +18,8 @@ import {
   INSURERS,
   DEPARTMENTS,
   CERTIFICATIONS,
+  DUMMY_PATIENT,
+  DUMMY_RESPONDERS,
 } from '@/lib/dummy-data'
 
 interface LoginBottomSheetProps {
