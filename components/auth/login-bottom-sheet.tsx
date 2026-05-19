@@ -17,6 +17,8 @@ import {
   MEDICAL_AIDS,
   INSURERS,
   DEPARTMENTS,
+  DUMMY_PATIENT,
+  DUMMY_RESPONDERS,
   CERTIFICATIONS,
   DUMMY_PATIENT,
   DUMMY_RESPONDERS,
@@ -29,7 +31,9 @@ interface LoginBottomSheetProps {
 }
 
 export function LoginBottomSheet({ isOpen, onClose, mode }: LoginBottomSheetProps) {
+  const router = useRouter()
   const login = useAppStore((state) => state.login)
+  const setRole = useAppStore((state) => state.setRole)
   const [step, setStep] = useState(1)
   const [isLogin, setIsLogin] = useState(true)
 
@@ -109,32 +113,50 @@ export function LoginBottomSheet({ isOpen, onClose, mode }: LoginBottomSheetProp
   }
 
   const handleSubmit = () => {
-    const user: User = {
-      id: Math.random().toString(36).substring(7),
-      name: formData.name,
-      surname: formData.surname,
-      dateOfBirth: formData.dateOfBirth,
-      gender: formData.gender,
-      language: formData.language,
-      bloodType: formData.bloodType,
-      weight: parseFloat(formData.weight) || 0,
-      height: parseFloat(formData.height) || 0,
-      medicalConditions: formData.medicalConditions,
-      medications: formData.medications,
-      medicalAid: formData.medicalAid,
-      medicalAidNumber: formData.medicalAidNumber,
-      insurer: formData.insurer,
-      preferredGP: formData.preferredGP,
-      emergencyContacts: formData.emergencyContacts,
-      ...(mode === 'responder' && {
-        employeeId: formData.employeeId,
-        department: formData.department as typeof DEPARTMENTS[number],
-        rank: formData.rank,
-        certifications: formData.certifications,
-      }),
+    const username = formData.email.trim().toLowerCase()
+    const password = formData.password.trim().toLowerCase()
+
+    if (username === 'admin' && password === 'patient') {
+      login(DUMMY_PATIENT)
+      setRole('patient')
+      router.push('/app')
+      onClose()
+      return
     }
-    login(user)
-    onClose()
+
+    if (username === 'admin' && password === 'ems') {
+      const responder = DUMMY_RESPONDERS[0]
+      const staffUser: User = {
+        id: responder.id || 'staff1',
+        name: responder.name || 'EMS',
+        surname: responder.surname || 'Responder',
+        dateOfBirth: '1988-04-12',
+        gender: 'Male',
+        language: 'English',
+        bloodType: 'O+',
+        weight: 80,
+        height: 180,
+        medicalConditions: [],
+        medications: '',
+        medicalAid: '',
+        medicalAidNumber: '',
+        insurer: '',
+        preferredGP: '',
+        emergencyContacts: [],
+        employeeId: responder.employeeId,
+        department: responder.department,
+        rank: responder.rank,
+        certifications: responder.certifications || [],
+        assignedVehicle: undefined,
+      }
+      login(staffUser)
+      setRole('responder')
+      router.push('/responder')
+      onClose()
+      return
+    }
+
+    window.alert('Invalid credentials. Try admin / patient or admin / ems.')
   }
 
   const totalSteps = mode === 'responder' ? 4 : 3

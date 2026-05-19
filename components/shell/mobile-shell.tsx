@@ -10,13 +10,18 @@ import { useAppStore } from '@/store/useAppStore'
 interface MobileShellProps {
   children: ReactNode
   onPanicPress?: () => void
-  onProfilePress?: () => void
+  onProfilePress?: (isLoggedIn: boolean) => void
   centerButton?: 'panic' | 'duty'
 }
 
 export function MobileShell({ children, onPanicPress, onProfilePress, centerButton = 'panic' }: MobileShellProps) {
-  const pathname = usePathname()
   const { isLoggedIn, user, role } = useAppStore()
+  const handleProfileClick = () => {
+    if (onProfilePress) {
+      onProfilePress(isLoggedIn)
+    }
+  }
+  const pathname = usePathname()
 
   const isPatient = role === 'patient'
   const homeRoute = isPatient ? '/app' : '/responder'
@@ -34,7 +39,7 @@ export function MobileShell({ children, onPanicPress, onProfilePress, centerButt
         
         {/* Profile / Login button */}
         <button
-          onClick={onProfilePress}
+          onClick={handleProfileClick}
           className="w-11 h-11 rounded-full overflow-hidden border-2 border-border flex items-center justify-center bg-muted hover:bg-accent transition-colors"
         >
           {isLoggedIn && user ? (

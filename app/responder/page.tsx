@@ -9,17 +9,18 @@ import { DutyToggle } from '@/components/responder/duty-toggle'
 import { InspectionFlow } from '@/components/responder/inspection-flow'
 import { ActiveEmergencyCard } from '@/components/responder/active-emergency-card'
 import { LoginBottomSheet } from '@/components/auth/login-bottom-sheet'
+import { ProfileSheet } from '@/components/profile/profile-sheet'
 import { useAppStore } from '@/store/useAppStore'
-import { DUMMY_INCIDENTS, MAP_CENTER } from '@/lib/dummy-data'
+import { MAP_CENTER } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 
 export default function ResponderHomePage() {
-  const { isLoggedIn, isOnDuty, currentIncident, setCurrentIncident } = useAppStore()
+  const { isLoggedIn, isOnDuty, currentIncident, setCurrentIncident, activeIncidents } = useAppStore()
   const [inspectionOpen, setInspectionOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
 
-  // Get a sample active incident for demo
-  const sampleIncident = DUMMY_INCIDENTS[0]
+  const sampleIncident = activeIncidents[0]
 
   const handleGoOnDuty = () => {
     if (!isLoggedIn) {
@@ -33,12 +34,18 @@ export default function ResponderHomePage() {
     setInspectionOpen(false)
     // Simulate receiving an incident after going on duty
     setTimeout(() => {
-      setCurrentIncident(sampleIncident)
+      if (sampleIncident) {
+        setCurrentIncident(sampleIncident)
+      }
     }, 2000)
   }
 
-  const handleProfilePress = () => {
-    setLoginOpen(true)
+  const handleProfilePress = (loggedIn: boolean) => {
+    if (loggedIn) {
+      setProfileOpen(true)
+    } else {
+      setLoginOpen(true)
+    }
   }
 
   const handleResolveIncident = () => {
@@ -63,7 +70,7 @@ export default function ResponderHomePage() {
               height="40vh"
               showHospitals
               showIncidents={isOnDuty}
-              incidents={isOnDuty ? DUMMY_INCIDENTS : []}
+              incidents={isOnDuty ? activeIncidents : []}
               userLocation={MAP_CENTER}
               className="rounded-2xl overflow-hidden"
             />
@@ -74,7 +81,7 @@ export default function ResponderHomePage() {
             <div className="p-4 space-y-4">
               <h2 className="font-semibold text-foreground">Active Incidents in Your Area</h2>
               
-              {DUMMY_INCIDENTS.map((incident, index) => (
+              {activeIncidents.map((incident, index) => (
                 <motion.button
                   key={incident.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -154,6 +161,11 @@ export default function ResponderHomePage() {
         isOpen={loginOpen}
         onClose={() => setLoginOpen(false)}
         mode="responder"
+      />
+
+      <ProfileSheet
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
       />
     </>
   )
