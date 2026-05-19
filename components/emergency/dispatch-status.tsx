@@ -12,6 +12,7 @@ import { DUMMY_RESPONDERS } from '@/lib/dummy-data'
 interface DispatchStatusProps {
   isOpen: boolean
   onClose: () => void
+  onResolve: () => void
   emergencyType: EmergencyType
   severity: Severity
   incidentType: string
@@ -20,6 +21,7 @@ interface DispatchStatusProps {
 export function DispatchStatus({
   isOpen,
   onClose,
+  onResolve,
   emergencyType,
   severity,
   incidentType,
@@ -137,7 +139,7 @@ export function DispatchStatus({
 
         {/* Resolve button */}
         <Button
-          onClick={onClose}
+          onClick={onResolve}
           variant="outline"
           className="w-full h-12 rounded-xl"
         >

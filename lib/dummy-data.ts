@@ -238,6 +238,27 @@ export const DUMMY_RESPONDERS: User[] = [
   },
 ]
 
+export const DUMMY_PATIENT: User = {
+  id: 'patient1',
+  name: 'Lerato',
+  surname: 'Mabena',
+  dateOfBirth: '1990-03-18',
+  gender: 'Female',
+  language: 'English',
+  bloodType: 'O+',
+  weight: 68,
+  height: 164,
+  medicalConditions: ['Asthmatic'],
+  medications: 'Salbutamol inhaler',
+  medicalAid: 'Discovery Health',
+  medicalAidNumber: 'DH123456',
+  insurer: 'Discovery Insure',
+  preferredGP: 'Dr. Ndlovu',
+  emergencyContacts: [
+    { name: 'Sipho Mabena', relationship: 'Brother', phone: '+27123456789' },
+  ],
+}
+
 // Dummy Dispatchers
 export const DUMMY_DISPATCHERS = [
   { id: 'd1', name: 'Sarah van der Merwe', area: 'Tembisa Central', status: 'active' as const },

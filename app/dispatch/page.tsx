@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { 
   Bell, 
   ChevronLeft, 
@@ -23,63 +23,49 @@ import { VehicleList } from '@/components/dispatcher/vehicle-list'
 import { IncidentDetailPanel } from '@/components/dispatcher/incident-detail-panel'
 import { NotificationTray } from '@/components/notifications/notification-tray'
 import { useAppStore, type Incident, type Vehicle } from '@/store/useAppStore'
-import { DUMMY_INCIDENTS, DUMMY_VEHICLES, DUMMY_NOTIFICATIONS, DUMMY_DISPATCHERS, MAP_CENTER } from '@/lib/dummy-data'
+import { MAP_CENTER } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 
 export default function DispatcherDashboard() {
-  const { 
-    dispatcherStatus, 
-    setDispatcherStatus, 
-    notifications,
+  const {
+    dispatcherStatus,
+    setDispatcherStatus,
     addNotification,
-    unreadCount 
+    unreadCount,
+    activeIncidents,
+    vehicles,
+    dispatchers,
+    updateIncident,
   } = useAppStore()
-  
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState('queue')
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [incidents, setIncidents] = useState<Incident[]>(DUMMY_INCIDENTS)
-  const [vehicles] = useState<Vehicle[]>(DUMMY_VEHICLES)
-
-  // Initialize notifications
-  useEffect(() => {
-    if (notifications.length === 0) {
-      DUMMY_NOTIFICATIONS.forEach((n) => {
-        addNotification({ type: n.type, title: n.title, body: n.body })
-      })
-    }
-  }, [])
 
   // Stats
   const stats = {
-    critical: incidents.filter((i) => i.severity === 'critical').length,
-    serious: incidents.filter((i) => i.severity === 'serious').length,
-    minor: incidents.filter((i) => i.severity === 'minor').length,
+    critical: activeIncidents.filter((i) => i.severity === 'critical').length,
+    serious: activeIncidents.filter((i) => i.severity === 'serious').length,
+    minor: activeIncidents.filter((i) => i.severity === 'minor').length,
   }
 
-  const dispatcher = DUMMY_DISPATCHERS[0]
+  const dispatcher = dispatchers[0]
 
   const handleDispatch = (incidentId: string, vehicleId: string, notes: string) => {
     const vehicle = vehicles.find((v) => v.id === vehicleId)
-    setIncidents((prev) =>
-      prev.map((i) =>
-        i.id === incidentId
-          ? {
-              ...i,
-              status: 'dispatched',
-              assignedVehicle: vehicle?.plate,
-              assignedResponder: vehicle?.assignedTo || 'Available Unit',
-              dispatcherNotes: notes,
-            }
-          : i
-      )
-    )
+    updateIncident(incidentId, {
+      status: 'dispatched',
+      assignedVehicle: vehicle?.plate,
+      assignedResponder: vehicle?.assignedTo || 'Available Unit',
+      dispatcherNotes: notes,
+    })
+
     addNotification({
       type: 'system',
       title: 'Vehicle Dispatched',
-      body: `${vehicle?.plate} dispatched to ${incidents.find((i) => i.id === incidentId)?.location.address}`,
+      body: `${vehicle?.plate} dispatched to ${activeIncidents.find((i) => i.id === incidentId)?.location.address}`,
     })
     setSelectedIncident(null)
   }
@@ -159,7 +145,7 @@ export default function DispatcherDashboard() {
 
             <TabsContent value="queue" className="flex-1 overflow-y-auto m-0">
               <IncidentQueue
-                incidents={incidents}
+                incidents={activeIncidents}
                 selectedIncidentId={selectedIncident?.id}
                 onSelectIncident={setSelectedIncident}
               />
@@ -294,7 +280,7 @@ export default function DispatcherDashboard() {
             showHospitals
             showClinics
             showIncidents
-            incidents={incidents}
+            incidents={activeIncidents}
             userLocation={MAP_CENTER}
           />
 

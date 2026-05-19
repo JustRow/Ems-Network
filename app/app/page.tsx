@@ -11,18 +11,19 @@ import { PanicCallUI } from '@/components/emergency/panic-call-ui'
 import { SuicideHelpline } from '@/components/emergency/suicide-helpline'
 import { DispatchStatus } from '@/components/emergency/dispatch-status'
 import { LoginBottomSheet } from '@/components/auth/login-bottom-sheet'
-import { useAppStore, type EmergencyType, type Severity } from '@/store/useAppStore'
-import { DUMMY_INCIDENTS } from '@/lib/dummy-data'
+import { ProfileSheet } from '@/components/profile/profile-sheet'
+import { useAppStore, type EmergencyType, type Severity, type Incident } from '@/store/useAppStore'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export default function PatientHomePage() {
-  const { isLoggedIn } = useAppStore()
+  const { isLoggedIn, submitDispatch, resolveDispatch, activeDispatch } = useAppStore()
   const [triageOpen, setTriageOpen] = useState(false)
   const [triageType, setTriageType] = useState<EmergencyType>('medical')
   const [panicOpen, setPanicOpen] = useState(false)
   const [helplineOpen, setHelplineOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const [dispatchOpen, setDispatchOpen] = useState(false)
   const [dispatchData, setDispatchData] = useState<{
     type: EmergencyType
@@ -30,15 +31,32 @@ export default function PatientHomePage() {
     incidentType: string
   } | null>(null)
 
-  // Get active critical incident for alert banner
-  const activeIncident = DUMMY_INCIDENTS.find((i) => i.status === 'dispatched' && i.severity === 'critical')
-
   const handleServiceTap = (type: EmergencyType) => {
     setTriageType(type)
     setTriageOpen(true)
   }
 
   const handleDispatch = (data: { incidentType: string; severity: Severity; description: string }) => {
+    const incident: Incident = {
+      id: `inc-${Date.now()}`,
+      type: triageType,
+      incidentType: data.incidentType,
+      severity: data.severity,
+      description: data.description,
+      patientId: 'patient1',
+      patientName: 'You',
+      location: {
+        lat: -26.0067,
+        lng: 28.2260,
+        address: 'Current location',
+      },
+      timestamp: new Date(),
+      status: 'dispatched',
+      assignedVehicle: 'GP 202 EMS',
+      assignedResponder: 'On duty responder',
+    }
+
+    submitDispatch(incident)
     setDispatchData({
       type: triageType,
       severity: data.severity,
@@ -48,8 +66,12 @@ export default function PatientHomePage() {
     setDispatchOpen(true)
   }
 
-  const handleProfilePress = () => {
-    setLoginOpen(true)
+  const handleProfilePress = (loggedIn: boolean) => {
+    if (loggedIn) {
+      setProfileOpen(true)
+    } else {
+      setLoginOpen(true)
+    }
   }
 
   return (
@@ -60,7 +82,7 @@ export default function PatientHomePage() {
           <EMSMap height="35vh" className="rounded-none" />
 
           {/* Active emergency alert */}
-          {activeIncident && (
+          {activeDispatch && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -73,7 +95,7 @@ export default function PatientHomePage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold">Active Emergency</p>
-                    <p className="text-sm text-white/80">{activeIncident.incidentType} - {activeIncident.patientName}</p>
+                    <p className="text-sm text-white/80">{activeDispatch.incidentType} - {activeDispatch.patientName}</p>
                   </div>
                 </div>
               </div>
@@ -81,7 +103,7 @@ export default function PatientHomePage() {
           )}
 
           {/* Service cards */}
-          <div className={cn('p-4 space-y-4', activeIncident ? 'pt-4' : 'pt-6')}>
+          <div className={cn('p-4 space-y-4', activeDispatch ? 'pt-4' : 'pt-6')}>
             <h2 className="text-lg font-semibold text-foreground">Emergency Services</h2>
             
             <ServiceCardGrid>
@@ -157,10 +179,20 @@ export default function PatientHomePage() {
         mode="patient"
       />
 
+      <ProfileSheet
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
+
       {dispatchData && (
         <DispatchStatus
           isOpen={dispatchOpen}
           onClose={() => {
+            setDispatchOpen(false)
+            setDispatchData(null)
+          }}
+          onResolve={() => {
+            resolveDispatch()
             setDispatchOpen(false)
             setDispatchData(null)
           }}
