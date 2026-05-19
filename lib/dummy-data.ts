@@ -85,29 +85,6 @@ export const DEPARTMENTS = [
 // Tembisa / Ekurhuleni area coordinates
 export const MAP_CENTER = { lat: -26.0067, lng: 28.2260 }
 
-// Dummy Patient for authentication
-export const DUMMY_PATIENT: User = {
-  id: 'patient-1',
-  name: 'Thandi',
-  surname: 'Molefe',
-  dateOfBirth: '1992-05-15',
-  gender: 'female',
-  language: 'Zulu',
-  bloodType: 'O+',
-  weight: 65,
-  height: 165,
-  medicalConditions: ['Asthmatic'],
-  medications: 'Ventolin inhaler as needed',
-  medicalAid: 'Discovery Health',
-  medicalAidNumber: 'DH12345678',
-  insurer: 'Discovery Insure',
-  preferredGP: 'Dr. Nkosi',
-  emergencyContacts: [
-    { name: 'Sipho Molefe', relationship: 'Husband', phone: '0823456789' },
-    { name: 'Grace Molefe', relationship: 'Mother', phone: '0834567890' },
-  ],
-}
-
 // Dummy Vehicles
 export const DUMMY_VEHICLES: Vehicle[] = [
   { id: 'v1', plate: 'GP 123 EMS', make: 'Toyota Quantum', type: 'ambulance', status: 'available', inspectionComplete: true, lastInspection: '2024-01-15' },

@@ -20,8 +20,6 @@ import {
   DUMMY_PATIENT,
   DUMMY_RESPONDERS,
   CERTIFICATIONS,
-  DUMMY_PATIENT,
-  DUMMY_RESPONDERS,
 } from '@/lib/dummy-data'
 
 interface LoginBottomSheetProps {
