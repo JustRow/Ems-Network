@@ -19,6 +19,7 @@ import {
   Shield,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
+import { Logo } from '@/components/ui/logo'
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -58,9 +59,12 @@ export function AdminSidebar() {
               <div className="w-10 h-10 rounded-lg bg-medical flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h1 className="font-bold text-foreground">EMS Network</h1>
-                <p className="text-xs text-muted-foreground">Admin Portal</p>
+              <div className="flex items-center gap-2">
+                <Logo size="sm" rounded className="w-8 h-8 bg-medical flex items-center justify-center" />
+                <div>
+                  <h1 className="font-bold text-foreground">EMS Network</h1>
+                  <p className="text-xs text-muted-foreground">Admin Portal</p>
+                </div>
               </div>
             </motion.div>
           )}

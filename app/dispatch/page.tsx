@@ -25,6 +25,7 @@ import { NotificationTray } from '@/components/notifications/notification-tray'
 import { useAppStore, type Incident, type Vehicle } from '@/store/useAppStore'
 import { MAP_CENTER, DUMMY_DISPATCHERS, DUMMY_VEHICLES } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
+import { Logo } from '@/components/ui/logo'
 
 export default function DispatcherDashboard() {
   const {
@@ -108,8 +109,8 @@ export default function DispatcherDashboard() {
         <div className="h-16 border-b border-border flex items-center justify-between px-4">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full border-2 border-police flex items-center justify-center bg-white">
-                <span className="text-police font-bold text-xs">EMS</span>
+              <div className="w-8 h-8">
+                <Logo size="xs" rounded className="border-2 border-police bg-white" />
               </div>
               <span className="font-semibold text-foreground">Dispatch</span>
             </div>

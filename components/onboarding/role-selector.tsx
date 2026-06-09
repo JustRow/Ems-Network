@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { type UserRole, useAppStore } from '@/store/useAppStore'
 import { useRouter } from 'next/navigation'
+import { Logo } from '@/components/ui/logo'
 
 const ROLES = [
   {
@@ -73,8 +74,8 @@ export function RoleSelector() {
         transition={{ duration: 0.4 }}
         className="mb-8"
       >
-        <div className="w-20 h-20 rounded-full border-4 border-police flex items-center justify-center bg-white dark:bg-card">
-          <span className="text-police font-bold text-xl">EMS</span>
+        <div className="flex items-center justify-center">
+          <Logo size="lg" rounded className="border-4 border-police bg-white dark:bg-card" />
         </div>
       </motion.div>
 
