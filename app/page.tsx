@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { OnboardingCarousel } from '@/components/onboarding/carousel'
 import { RoleSelector } from '@/components/onboarding/role-selector'
 import { useAppStore } from '@/store/useAppStore'
+import { Logo } from '@/components/ui/logo'
 
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -19,10 +20,8 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full border-4 border-police flex items-center justify-center bg-white dark:bg-card animate-pulse">
-          <span className="text-police font-bold text-lg">EMS</span>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Logo size="lg" rounded className="border-4 border-police bg-white dark:bg-card animate-pulse" />
       </div>
     )
   }

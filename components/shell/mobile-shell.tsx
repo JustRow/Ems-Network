@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Home, User, Bell as AlarmIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
+import { Logo } from '@/components/ui/logo'
 
 interface MobileShellProps {
   children: ReactNode
@@ -31,8 +32,8 @@ export function MobileShell({ children, onPanicPress, onProfilePress, centerButt
       {/* Header */}
       <header className="flex items-center justify-between p-4 safe-area-top">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full border-2 border-police flex items-center justify-center bg-white dark:bg-card">
-            <span className="text-police font-bold text-xs">EMS</span>
+          <div className="w-8 h-8">
+            <Logo size="sm" rounded className="border-2 border-police bg-white dark:bg-card" />
           </div>
           <span className="font-semibold text-foreground">EMS Network</span>
         </div>
