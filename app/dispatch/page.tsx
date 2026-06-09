@@ -53,7 +53,7 @@ export default function DispatcherDashboard() {
     minor: activeIncidents.filter((i) => i.severity === 'minor').length,
   }
 
-  const dispatcher = dispatchers[0]
+  const dispatcher = dispatchers?.[0] || { id: 'd1', name: 'Dispatcher', area: 'Area', status: 'active' as const }0] || { id: 'd1', name: 'Dispatcher', area: 'Area', status: 'active' as const }0] || { id: 'd1', name: 'Dispatcher', area: 'Area', status: 'active' as const }0] || { id: 'd1', name: 'Dispatcher', area: 'Area', status: 'active' as const }
 
   const handleDispatch = (incidentId: string, vehicleId: string, notes: string) => {
     const vehicle = vehicles.find((v) => v.id === vehicleId)
