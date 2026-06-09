@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useAppStore, type User, type EmergencyContact } from '@/store/useAppStore'
+import { useAppStore, type User, type Department, type EmergencyContact } from '@/store/useAppStore'
+import { createClient } from '@/utils/supabase/client'
 import {
   BLOOD_TYPES,
   LANGUAGES,
@@ -110,51 +111,174 @@ export function LoginBottomSheet({ isOpen, onClose, mode }: LoginBottomSheetProp
     }))
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const supabase = createClient()
     const username = formData.email.trim().toLowerCase()
-    const password = formData.password.trim().toLowerCase()
+    const password = formData.password.trim()
 
-    if (username === 'admin' && password === 'patient') {
-      login(DUMMY_PATIENT)
+    if (isLogin) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: username,
+        password: password,
+      })
+
+      if (error) {
+        window.alert(error.message)
+        return
+      }
+
+      // Check role based on schema
+      if (mode === 'responder') {
+        const userRole = data.user.user_metadata?.role
+
+        if (userRole !== 'responder' && userRole !== 'admin') {
+          window.alert('This account is not authorized as a responder.')
+          return
+        }
+
+        const responderUser: User = {
+          id: data.user.id,
+          name: data.user.user_metadata?.name || 'Responder',
+          surname: data.user.user_metadata?.surname || '',
+          dateOfBirth: '',
+          gender: '',
+          language: 'English',
+          bloodType: '',
+          weight: 0,
+          height: 0,
+          medicalConditions: [],
+          medications: '',
+          medicalAid: '',
+          medicalAidNumber: '',
+          insurer: '',
+          preferredGP: '',
+          emergencyContacts: [],
+          employeeId: data.user.user_metadata?.employeeId || '',
+          department: data.user.user_metadata?.department as Department | undefined,
+          rank: data.user.user_metadata?.rank || '',
+          certifications: [],
+        }
+
+        login(responderUser)
+        setRole('responder')
+        router.push('/responder')
+        onClose()
+        return
+      }
+
+      const { data: patientProfile, error: profileError } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profileError) {
+        console.error(profileError)
+      }
+
+      login({
+        id: data.user.id,
+        name: patientProfile?.name || formData.name,
+        surname: patientProfile?.surname || formData.surname,
+        dateOfBirth: patientProfile?.date_of_birth || '',
+        gender: patientProfile?.gender || '',
+        language: patientProfile?.language || 'English',
+        bloodType: patientProfile?.blood_type || '',
+        weight: patientProfile?.weight_kg || 0,
+        height: patientProfile?.height_cm || 0,
+        medicalConditions: patientProfile?.medical_conditions || [],
+        medications: patientProfile?.medications || '',
+        medicalAid: patientProfile?.medical_aid || '',
+        medicalAidNumber: patientProfile?.medical_aid_number || '',
+        insurer: patientProfile?.insurer || '',
+        preferredGP: patientProfile?.preferred_gp || '',
+        emergencyContacts: [],
+      })
       setRole('patient')
       router.push('/app')
       onClose()
-      return
-    }
+    } else {
+      // Registration
+      const { data, error } = await supabase.auth.signUp({
+        email: username,
+        password: password,
+        options: {
+          data: {
+            role: mode === 'responder' ? 'responder' : 'patient'
+          }
+        }
+      })
 
-    if (username === 'admin' && password === 'ems') {
-      const responder = DUMMY_RESPONDERS[0]
-      const staffUser: User = {
-        id: responder.id || 'staff1',
-        name: responder.name || 'EMS',
-        surname: responder.surname || 'Responder',
-        dateOfBirth: '1988-04-12',
-        gender: 'Male',
-        language: 'English',
-        bloodType: 'O+',
-        weight: 80,
-        height: 180,
-        medicalConditions: [],
-        medications: '',
-        medicalAid: '',
-        medicalAidNumber: '',
-        insurer: '',
-        preferredGP: '',
-        emergencyContacts: [],
-        employeeId: responder.employeeId,
-        department: responder.department,
-        rank: responder.rank,
-        certifications: responder.certifications || [],
-        assignedVehicle: undefined,
+      if (error) {
+        window.alert(error.message)
+        return
       }
-      login(staffUser)
-      setRole('responder')
-      router.push('/responder')
-      onClose()
-      return
-    }
 
-    window.alert('Invalid credentials. Try admin / patient or admin / ems.')
+      if (data.user && mode === 'patient') {
+        const userId = data.user.id
+
+        const { error: insertError } = await supabase.from('patients').insert({
+          id: userId,
+          name: formData.name,
+          surname: formData.surname,
+          date_of_birth: formData.dateOfBirth || null,
+          gender: formData.gender,
+          language: formData.language,
+          blood_type: formData.bloodType || null,
+          weight_kg: formData.weight ? parseFloat(formData.weight) : null,
+          height_cm: formData.height ? parseFloat(formData.height) : null,
+          medical_conditions: formData.medicalConditions,
+          medications: formData.medications,
+          medical_aid: formData.medicalAid,
+          medical_aid_number: formData.medicalAidNumber,
+          insurer: formData.insurer,
+          preferred_gp: formData.preferredGP,
+        })
+        
+        if (insertError) {
+          console.error('Failed to create patient profile:', insertError)
+        }
+
+        // Insert emergency contacts
+        const validContacts = formData.emergencyContacts.filter(c => c.name && c.phone)
+        if (validContacts.length > 0) {
+          const { error: contactsError } = await supabase.from('emergency_contacts').insert(
+            validContacts.map((c, i) => ({
+              user_id: userId,
+              name: c.name,
+              relationship: c.relationship,
+              phone: c.phone,
+              sort_order: i
+            }))
+          )
+          if (contactsError) {
+            console.error('Failed to create emergency contacts:', contactsError)
+          }
+        }
+
+        login({
+          id: userId,
+          name: formData.name,
+          surname: formData.surname,
+          dateOfBirth: formData.dateOfBirth,
+          gender: formData.gender,
+          language: formData.language,
+          bloodType: formData.bloodType,
+          weight: formData.weight ? parseFloat(formData.weight) : 0,
+          height: formData.height ? parseFloat(formData.height) : 0,
+          medicalConditions: formData.medicalConditions,
+          medications: formData.medications,
+          medicalAid: formData.medicalAid,
+          medicalAidNumber: formData.medicalAidNumber,
+          insurer: formData.insurer,
+          preferredGP: formData.preferredGP,
+          emergencyContacts: validContacts,
+        })
+        setRole('patient')
+        router.push('/app')
+        onClose()
+      }
+    }
   }
 
   const totalSteps = mode === 'responder' ? 4 : 3

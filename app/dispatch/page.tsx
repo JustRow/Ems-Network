@@ -23,7 +23,7 @@ import { VehicleList } from '@/components/dispatcher/vehicle-list'
 import { IncidentDetailPanel } from '@/components/dispatcher/incident-detail-panel'
 import { NotificationTray } from '@/components/notifications/notification-tray'
 import { useAppStore, type Incident, type Vehicle } from '@/store/useAppStore'
-import { MAP_CENTER } from '@/lib/dummy-data'
+import { MAP_CENTER, DUMMY_DISPATCHERS, DUMMY_VEHICLES } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 
 export default function DispatcherDashboard() {
@@ -33,10 +33,11 @@ export default function DispatcherDashboard() {
     addNotification,
     unreadCount,
     activeIncidents,
-    vehicles,
-    dispatchers,
     updateIncident,
   } = useAppStore()
+
+  const vehicles = DUMMY_VEHICLES
+  const dispatchers = DUMMY_DISPATCHERS
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState('queue')

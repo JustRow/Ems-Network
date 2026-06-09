@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Shield, Ambulance, Flame, Newspaper, Heart, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { MobileShell } from '@/components/shell/mobile-shell'
 import { EMSMap } from '@/components/map/ems-map'
+import { createClient } from '@/utils/supabase/client'
 import { ServiceCard, ServiceCardGrid } from '@/components/emergency/service-card'
 import { TriageFlow } from '@/components/emergency/triage-flow'
 import { PanicCallUI } from '@/components/emergency/panic-call-ui'
@@ -17,7 +18,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export default function PatientHomePage() {
-  const { isLoggedIn, submitDispatch, resolveDispatch, activeDispatch } = useAppStore()
+  const { isLoggedIn, user, setActiveDispatch, resolveDispatch, activeDispatch } = useAppStore()
   const [triageOpen, setTriageOpen] = useState(false)
   const [triageType, setTriageType] = useState<EmergencyType>('medical')
   const [panicOpen, setPanicOpen] = useState(false)
@@ -31,32 +32,95 @@ export default function PatientHomePage() {
     incidentType: string
   } | null>(null)
 
+  useEffect(() => {
+    if (!activeDispatch?.id) return
+
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`incident-${activeDispatch.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'incidents', filter: `id=eq.${activeDispatch.id}` },
+        (payload) => {
+          const updated = payload.new
+          setActiveDispatch({
+            ...activeDispatch,
+            status: updated.status,
+            assignedVehicle: updated.assigned_vehicle_plate || activeDispatch.assignedVehicle,
+            assignedResponder: updated.assigned_responder_name || activeDispatch.assignedResponder,
+          })
+          
+          if (updated.status === 'resolved' || updated.status === 'cancelled') {
+             resolveDispatch()
+             setDispatchOpen(false)
+             setDispatchData(null)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [activeDispatch?.id, activeDispatch, setActiveDispatch, resolveDispatch])
+
   const handleServiceTap = (type: EmergencyType) => {
     setTriageType(type)
     setTriageOpen(true)
   }
 
-  const handleDispatch = (data: { incidentType: string; severity: Severity; description: string }) => {
+  const handleDispatch = async (data: { incidentType: string; severity: Severity; description: string }) => {
+    if (!user) {
+      setLoginOpen(true)
+      return
+    }
+
+    const supabase = createClient()
+    const lng = 28.2260
+    const lat = -26.0067
+
+    const { data: insertedIncident, error } = await supabase.from('incidents').insert({
+      type: triageType,
+      incident_type: data.incidentType,
+      severity: data.severity,
+      description: data.description,
+      status: 'pending',
+      patient_id: user.id,
+      patient_name: `${user.name} ${user.surname}`.trim(),
+      patient_age: user.dateOfBirth ? Math.floor((new Date().getTime() - new Date(user.dateOfBirth).getTime()) / 31557600000) : null,
+      patient_blood_type: user.bloodType || null,
+      patient_conditions: user.medicalConditions || [],
+      patient_language: user.language || 'English',
+      location: `POINT(${lng} ${lat})`,
+      location_address: 'Current location',
+    }).select().single()
+
+    if (error) {
+      console.error('Failed to create incident:', error)
+      alert('Failed to dispatch emergency.')
+      return
+    }
+
     const incident: Incident = {
-      id: `inc-${Date.now()}`,
+      id: insertedIncident.id,
       type: triageType,
       incidentType: data.incidentType,
       severity: data.severity,
       description: data.description,
-      patientId: 'patient1',
-      patientName: 'You',
+      patientId: user.id,
+      patientName: `${user.name} ${user.surname}`.trim(),
       location: {
-        lat: -26.0067,
-        lng: 28.2260,
+        lat,
+        lng,
         address: 'Current location',
       },
-      timestamp: new Date(),
-      status: 'dispatched',
-      assignedVehicle: 'GP 202 EMS',
-      assignedResponder: 'On duty responder',
+      timestamp: new Date(insertedIncident.created_at),
+      status: 'pending',
+      assignedVehicle: undefined,
+      assignedResponder: undefined,
     }
 
-    submitDispatch(incident)
+    setActiveDispatch(incident)
     setDispatchData({
       type: triageType,
       severity: data.severity,
@@ -77,9 +141,11 @@ export default function PatientHomePage() {
   return (
     <>
       <MobileShell onPanicPress={() => setPanicOpen(true)} onProfilePress={handleProfilePress}>
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full">
           {/* Map section */}
-          <EMSMap height="35vh" className="rounded-none" />
+          {activeDispatch && (
+            <EMSMap height="35vh" className="rounded-none" />
+          )}
 
           {/* Active emergency alert */}
           {activeDispatch && (
@@ -103,56 +169,71 @@ export default function PatientHomePage() {
           )}
 
           {/* Service cards */}
-          <div className={cn('p-4 space-y-4', activeDispatch ? 'pt-4' : 'pt-6')}>
-            <h2 className="text-lg font-semibold text-foreground">Emergency Services</h2>
+          <div className={cn('p-4 flex flex-col flex-1 gap-4', activeDispatch ? 'pt-4' : 'pt-6')}>
+            <h2 className="text-lg font-semibold text-foreground flex-shrink-0">Emergency Services</h2>
             
-            <ServiceCardGrid>
+            <ServiceCardGrid className="flex-1 flex flex-col justify-evenly gap-3">
               <ServiceCard
                 icon={Shield}
                 label="Police & Metro"
-                color="bg-police"
+                color="police"
+                className="flex-1 max-h-[120px]"
                 onClick={() => handleServiceTap('police')}
               />
               <ServiceCard
                 icon={Ambulance}
                 label="Medical"
-                color="bg-medical"
+                color="medical"
+                className="flex-1 max-h-[120px]"
                 onClick={() => handleServiceTap('medical')}
               />
               <ServiceCard
                 icon={Flame}
                 label="Fire & Rescue"
-                color="bg-fire"
+                color="fire"
+                className="flex-1 max-h-[120px]"
                 onClick={() => handleServiceTap('fire')}
               />
             </ServiceCardGrid>
 
             {/* Quick links */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Link href="/app/news">
+            <div className="flex flex-col gap-3 flex-1 justify-evenly mt-2">
+              <Link href="/app/news" className="w-full flex-1 flex max-h-[120px]">
                 <motion.div
                   whileTap={{ scale: 0.97 }}
-                  className="bg-gradient-to-r from-fire to-helpline rounded-2xl p-4 shadow-sm"
+                  className="bg-gradient-to-r from-fire to-helpline rounded-2xl p-4 shadow-sm flex items-center justify-between w-full"
                 >
-                  <Newspaper className="w-6 h-6 text-white mb-2" />
-                  <p className="text-white font-semibold">News</p>
-                  <p className="text-white/70 text-xs">Latest updates</p>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-xl">
+                      <Newspaper className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold">News & Updates</p>
+                      <p className="text-white/80 text-xs">Stay informed on local events</p>
+                    </div>
+                  </div>
                 </motion.div>
               </Link>
 
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setHelplineOpen(true)}
-                className="bg-helpline rounded-2xl p-4 shadow-sm text-left"
+                className="bg-helpline rounded-2xl p-4 shadow-sm w-full flex-1 flex items-center justify-between max-h-[120px]"
               >
-                <Heart className="w-6 h-6 text-white mb-2" />
-                <p className="text-white font-semibold">Crisis Help</p>
-                <p className="text-white/70 text-xs">24/7 Support</p>
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Heart className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-white font-semibold">Crisis Helpline</p>
+                    <p className="text-white/80 text-xs">24/7 Support and counseling</p>
+                  </div>
+                </div>
               </motion.button>
             </div>
 
             {/* Quick tip */}
-            <div className="bg-muted rounded-2xl p-4 mt-4">
+            <div className="bg-muted rounded-2xl p-4 mt-auto flex-shrink-0">
               <p className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">Tip:</span> Complete your profile with medical information to help responders serve you better in emergencies.
               </p>
